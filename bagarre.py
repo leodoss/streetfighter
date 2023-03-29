@@ -1,15 +1,42 @@
 import pygame
-from personnage import *
 
+class Personnage(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.posebaseversdroite = []
+        self.posebaseversdroite.append(pygame.image.load('images/posebaseversdroite1.png'))
+        self.posebaseversdroite.append(pygame.image.load('images/posebaseversdroite2.png'))
+        
+        self.curseur = 0
+        self.image = self.posebaseversdroite[self.curseur]
+        
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [x, y]
+        
+    def update(self):
+        '''
+        C'est une méthode de la classe mère Sprite qui ne fait rien de base
+        et qu'on décide donc de surcharger
+        '''
+        self.curseur += 0.05
+        if self.curseur >= len(self.posebaseversdroite):
+            self.curseur = 0
+        
+        self.image = self.posebaseversdroite[int(self.curseur)]
+        
+# Initialisation
 pygame.init()
-screen = pygame.display.set_mode((1920, 1080))
 clock = pygame.time.Clock()
-running = True
-background = pygame.image.load('images/background.jpg')
-crouch1 = pygame.image.load('images/_Crouch.png')
-crouch2 = pygame.image.load('images/_CrouchTransition.png')
-joueur1 = Personnage('Leo', 100, 10, 5, {'crouch' : [crouch1, crouch2]})
 
+# Fenêtre
+screen = pygame.display.set_mode((1920, 1080))
+running = True
+background = pygame.image.load('images/terrain.jpg')
+
+# Importation des sprites
+group_personnages = pygame.sprite.Group()
+perso1 = Personnage(10, 800)
+group_personnages.add(perso1)
 
 while running:
     for event in pygame.event.get():
@@ -17,12 +44,9 @@ while running:
             running = False
             
     screen.blit(background, (0,0))
+    group_personnages.draw(screen)
+    group_personnages.update()
     pygame.display.flip()
-    keys = pygame.key.get_pressed()
-    
-    # if keys[pygame.K_s]:
-        # joueur1.crouch()
-
     clock.tick(60)
 
 pygame.quit()
