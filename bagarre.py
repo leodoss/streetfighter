@@ -1,16 +1,27 @@
 import pygame
 
 class Personnage(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, sens_base):
         super().__init__()
+        self.sens_base = sens_base
+        
         self.posebaseversdroite = []
-        im1 = pygame.image.load('images/posebaseversdroite1.png')
-        im2 = pygame.image.load('images/posebaseversdroite2.png')
-        self.posebaseversdroite.append(pygame.transform.scale(im1, (im1.get_rect().width*2, im1.get_rect().height*2)))
-        self.posebaseversdroite.append(pygame.transform.scale(im2, (im2.get_rect().width*2, im2.get_rect().height*2)))
+        imd1 = pygame.image.load('images/posebaseversdroite1.png')
+        imd2 = pygame.image.load('images/posebaseversdroite2.png')
+        self.posebaseversdroite.append(pygame.transform.scale(imd1, (imd1.get_rect().width*2, imd1.get_rect().height*2)))
+        self.posebaseversdroite.append(pygame.transform.scale(imd2, (imd2.get_rect().width*2, imd2.get_rect().height*2)))
+        
+        self.posebaseversgauche = []
+        img1 = pygame.image.load('images/posebaseversgauche1.png')
+        img2 = pygame.image.load('images/posebaseversgauche2.png')
+        self.posebaseversgauche.append(pygame.transform.scale(img1, (img1.get_rect().width*2, img1.get_rect().height*2)))
+        self.posebaseversgauche.append(pygame.transform.scale(img2, (img2.get_rect().width*2, img2.get_rect().height*2)))
         
         self.curseur = 0
-        self.image = self.posebaseversdroite[self.curseur]
+        if self.sens_base == "droite":
+            self.image = self.posebaseversdroite[self.curseur]
+        else:
+            self.image = self.posebaseversgauche[self.curseur]
         
         self.rect = self.image.get_rect()
         self.rect.topleft = [x, y]
@@ -21,10 +32,18 @@ class Personnage(pygame.sprite.Sprite):
         et qu'on décide donc de surcharger
         '''
         self.curseur += 0.1
-        if self.curseur >= len(self.posebaseversdroite):
-            self.curseur = 0
         
-        self.image = self.posebaseversdroite[int(self.curseur)]
+        if self.sens_base == "droite":
+            if self.curseur >= len(self.posebaseversdroite):
+                self.curseur = 0
+            
+            self.image = self.posebaseversdroite[int(self.curseur)]
+            
+        else:
+            if self.curseur >= len(self.posebaseversgauche):
+                self.curseur = 0
+            
+            self.image = self.posebaseversgauche[int(self.curseur)]
         
 # Initialisation
 pygame.init()
@@ -37,7 +56,7 @@ background = pygame.image.load('images/terrain.jpg')
 
 # Importation des sprites
 group_personnages = pygame.sprite.Group()
-perso1 = Personnage(10, 770)
+perso1 = Personnage(10, 770, "droite")
 group_personnages.add(perso1)
 
 while running:
