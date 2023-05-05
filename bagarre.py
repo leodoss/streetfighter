@@ -1,13 +1,15 @@
 import pygame
 
 class Personnage(pygame.sprite.Sprite):
-    def __init__(self, pv, degats, x, y, sens_base, vitesse, id):
+    def __init__(self, pv, degats, x, y, sens_base, vitesse, cooldown, id):
         super().__init__()
         self.pv = pv
         self.degats = degats
         self.sens_base = sens_base
         self.vitesse = vitesse
         self.id = id
+        self.cooldown = cooldown
+        self.tempsderecup = self.cooldown+1
         
         self.posebaseversdroite = []
         imd1 = pygame.image.load('images/posebaseversdroite1.png')
@@ -51,57 +53,42 @@ class Personnage(pygame.sprite.Sprite):
             
     def update_input(self, autre_perso) :
         keys = pygame.key.get_pressed()
+        self.rect.clamp_ip((0, 0, 1920, 1080))
+        self.tempsderecup += 1
+        print(self.cooldown)
         if self.id == 1:
             if keys[pygame.K_LEFT]:
-                if self.rect.x - 1*self.vitesse < 0:
-                    self.rect.x = 0
-                else:
-                    self.rect.x -= 1 * self.vitesse
-                    
+                self.rect.x -= 1 * self.vitesse
                 self.sens_base = 'gauche'
                 
             elif keys[pygame.K_RIGHT]:
-                if self.rect.x + 1*self.vitesse >= 1730:
-                    self.rect.x = 1730
-                else:
-                    self.rect.x += 1 * self.vitesse
-                    
+                self.rect.x += 1 * self.vitesse
                 self.sens_base = 'droite'
                 
             elif keys[pygame.K_m] :
                 self.attaque(autre_perso)
         else:
             if keys[pygame.K_q]:
-                if self.rect.x - 1*self.vitesse < 0:
-                    self.rect.x = 0
-                else:
-                    self.rect.x -= 1 * self.vitesse
-                    
+                self.rect.x -= 1 * self.vitesse
                 self.sens_base = 'gauche'
                 
             elif keys[pygame.K_d]:
-                if self.rect.x + 1*self.vitesse >= 1730:
-                    self.rect.x = 1730
-                else:
-                    self.rect.x += 1 * self.vitesse
-                    
+                self.rect.x += 1 * self.vitesse
                 self.sens_base = 'droite'
                 
             elif keys[pygame.K_v]:
                 self.attaque(autre_perso)
     
     def attaque(self, autre_perso):
-        if self.rect.colliderect(autre_perso.rect):
-            if autre_perso.pv - self.degats < 0:
-                autre_perso.pv = 0
-            else:
-                autre_perso.pv -= self.degats
-    
+        if self.tempsderecup > self.cooldown:
+            if self.rect.colliderect(autre_perso.rect):
+                if self.sens_base == "droite" and self.rect.x < autre_perso.rect.x or self.sens_base == "gauche" and self.rect.x > autre_perso.rect.x:
+                    if autre_perso.pv - self.degats < 0:
+                        autre_perso.pv = 0
+                    else:
+                        autre_perso.pv -= self.degats
+            self.tempsderecup = 0
             
-            
-                
-            
-        
     
 # Initialisation
 clock = pygame.time.Clock()
@@ -115,8 +102,8 @@ background = pygame.image.load('images/terrain.jpg')
 
 # Importation des sprites
 group_personnages = pygame.sprite.Group()
-perso1 = Personnage(1000, 10, 10, 770, "droite", 10, 0)
-perso2 = Personnage(1000, 10, 1700, 770, "gauche", 10, 1)
+perso1 = Personnage(1000, 10, 10, 770, "droite", 10, 30, 0)
+perso2 = Personnage(1000, 10, 1700, 770, "gauche", 10, 30, 1)
 group_personnages.add(perso1)
 group_personnages.add(perso2)
 
@@ -127,7 +114,6 @@ while running:
     pvPerso1 = font.render(str(perso1.pv), False, (255,255,255))
     pvPerso2 = font.render(str(perso2.pv), False, (255,255,255))
     
-            
     screen.blit(background, (0,0))
     screen.blit(pvPerso1, (20,20))
     screen.blit(pvPerso2, (1700,20))
